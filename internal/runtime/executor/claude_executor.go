@@ -128,6 +128,11 @@ func (e *ClaudeExecutor) Execute(ctx context.Context, auth *cliproxyauth.Auth, r
 	requestedModel := payloadRequestedModel(opts, req.Model)
 	body = applyPayloadConfigWithRoot(e.cfg, baseModel, to.String(), "", body, originalTranslated, requestedModel)
 
+	// Convert document content blocks with text MIME types to inline text.
+	// Ensures file attachments (CSV, JSON, TXT, etc.) are visible to Claude
+	// regardless of OAuth token type or API subscription level.
+	body = convertDocumentsToText(body)
+
 	// Disable thinking if tool_choice forces tool use (Anthropic API constraint)
 	body = disableThinkingIfToolChoiceForced(body)
 
@@ -293,6 +298,11 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 
 	requestedModel := payloadRequestedModel(opts, req.Model)
 	body = applyPayloadConfigWithRoot(e.cfg, baseModel, to.String(), "", body, originalTranslated, requestedModel)
+
+	// Convert document content blocks with text MIME types to inline text.
+	// Ensures file attachments (CSV, JSON, TXT, etc.) are visible to Claude
+	// regardless of OAuth token type or API subscription level.
+	body = convertDocumentsToText(body)
 
 	// Disable thinking if tool_choice forces tool use (Anthropic API constraint)
 	body = disableThinkingIfToolChoiceForced(body)
